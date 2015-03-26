@@ -12,6 +12,7 @@ def main():
     arg_parser.add_argument('database')
     arg_parser.add_argument('--prefix', default='')
     arg_parser.add_argument('--port', default=8058, type=int)
+    arg_parser.add_argument('--xheaders', action='store_true')
 
     args = arg_parser.parse_args()
 
@@ -19,7 +20,7 @@ def main():
     model = Model(database)
 
     app = App(model, prefix=args.prefix)
-    app.listen(args.port, address='localhost')
+    app.listen(args.port, address='localhost', xheaders=args.xheaders)
     IOLoop.current().start()
 
 
