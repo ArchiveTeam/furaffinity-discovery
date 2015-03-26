@@ -34,7 +34,7 @@ if StrictVersion(seesaw.__version__) < StrictVersion("0.8.3"):
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = "20150326.03"
+VERSION = "20150326.04"
 # USER_AGENT = 'ArchiveTeam'
 TRACKER_ID = 'furaffinitydisco'
 TRACKER_HOST = 'tracker.archiveteam.org'
@@ -110,12 +110,22 @@ class DiscoveryArgs(object):
 
         item_type, item_value = item['item_name'].split(':', 1)
 
-        doc = {
-            'nickname': realize(downloader, item),
-            'discovery_type': item_type,
-            'usernames': item_value.split(','),
-            'disco_tracker': DISCO_TRACKER_URL,
-        }
+        if item_type == 'usernames':
+            doc = {
+                'nickname': realize(downloader, item),
+                'discovery_type': item_type,
+                'usernames': item_value.split(','),
+                'disco_tracker': DISCO_TRACKER_URL,
+            }
+        elif item_type == 'search':
+            doc = {
+                'nickname': realize(downloader, item),
+                'discovery_type': item_type,
+                'query': item_value,
+                'disco_tracker': DISCO_TRACKER_URL,
+            }
+        else:
+            raise Exception('Unknown item type.')
 
         if 'bind_address' in globals():
             doc['bind_address'] = globals()['bind_address']

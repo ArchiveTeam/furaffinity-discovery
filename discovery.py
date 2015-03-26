@@ -1,13 +1,14 @@
 from __future__ import print_function
 import base64
-
 import json
 import random
-import requests
 import socket
 import sys
 import time
 import re
+
+import requests
+import requests.exceptions
 
 
 USER_AGENTS = [
@@ -48,6 +49,12 @@ def main():
     #     'usernames': ['toberkitty', 'furryguitarherosam', 'jjake33', 'narnla'],
     #     'disco_tracker': 'http://localhost:8058'
     # }
+    # arg_doc = {
+    #     'nickname': 'testuser',
+    #     'discovery_type': 'search',
+    #     'query': '@keywords%20puppy',
+    #     'disco_tracker': 'http://localhost:8058'
+    # }
 
     if 'bind_address' in arg_doc:
         # https://stackoverflow.com/questions/1150332/source-interface-with-python-and-urllib2
@@ -80,13 +87,16 @@ def main():
         raise Exception('Giving up!')
 
     discovery_type = arg_doc['discovery_type']
-    assert discovery_type == 'usernames'
-
     disco_tracker = arg_doc['disco_tracker']
 
-    results = discover_usernames(arg_doc['usernames'], fetch)
-
-    upload_username_results(results, disco_tracker)
+    if discovery_type == 'usernames':
+        results = discover_usernames(arg_doc['usernames'], fetch)
+        upload_username_results(results, disco_tracker)
+    elif discovery_type == 'search':
+        results = discover_usernames_by_search(arg_doc['query'], fetch)
+        upload_username_results(results, disco_tracker)
+    else:
+        raise Exception('Unknown discovery type')
 
     print_('Done!')
 
@@ -94,18 +104,24 @@ def main():
 def upload_username_results(results, tracker_url):
     for try_count in range(10):
         print_('Uploading results...', end='')
-        response = requests.post(
-            tracker_url + '/api/user_discovery',
-            data=json.dumps(results).encode('ascii'),
-            timeout=60
-        )
-        print_(response.status_code)
-
-        if response.status_code == 200:
-            return
-        else:
+        try:
+            response = requests.post(
+                tracker_url + '/api/user_discovery',
+                data=json.dumps(results).encode('ascii'),
+                timeout=60
+            )
+        except requests.exceptions.ConnectionError:
+            print_('Connection error.')
             print_('Sleeping...')
             time.sleep(60)
+        else:
+            print_(response.status_code)
+
+            if response.status_code == 200:
+                return
+            else:
+                print_('Sleeping...')
+                time.sleep(60)
 
 
 def discover_usernames(usernames, fetch):
@@ -133,6 +149,26 @@ def discover_usernames(usernames, fetch):
         'discovered_usernames': tuple(scraped_usernames),
         'username_private_map': username_private_map,
         'username_disabled_map': username_disabled_map
+    }
+
+
+def discover_usernames_by_search(query, fetch):
+    usernames = set()
+
+    for page in range(1, 30):
+        url = 'https://www.furaffinity.net/search/{query}?page={page}&perpage=60'.format(query=query, page=page)
+        response = fetch(url)
+        scraped_results = tuple(scrape_usernames(response.text))
+        usernames.update(scraped_results)
+        print_('(Found', len(scraped_results), ')')
+
+        if 'next_page' not in response.text:
+            break
+
+    return {
+        'discovered_usernames': tuple(usernames),
+        'username_private_map': {},
+        'username_disabled_map': {}
     }
 
 
