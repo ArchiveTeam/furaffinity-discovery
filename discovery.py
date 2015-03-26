@@ -72,7 +72,7 @@ def main():
                     'Page generated in' not in response.text and \
                     'This user cannot be found.' not in response.text:
                 print_('Problem detected. Sleeping.')
-                time.sleep(10)
+                time.sleep(60)
             else:
                 time.sleep(random.uniform(0.5, 1.5))
                 return response
@@ -105,7 +105,7 @@ def upload_username_results(results, tracker_url):
             return
         else:
             print_('Sleeping...')
-            time.sleep(10)
+            time.sleep(60)
 
 
 def discover_usernames(usernames, fetch):
