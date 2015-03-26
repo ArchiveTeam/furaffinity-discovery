@@ -1,4 +1,5 @@
 import argparse
+import logging
 
 from tornado.ioloop import IOLoop
 
@@ -8,6 +9,8 @@ from fadisco.model import Model
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
+
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('database')
     arg_parser.add_argument('--prefix', default='')

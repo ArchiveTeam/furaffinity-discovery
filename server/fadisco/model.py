@@ -12,7 +12,8 @@ class Model(object):
     def add_user_discovery(self, results):
         usernames = tuple(itertools.chain(
             results['discovered_usernames'],
-            results['username_private_map'].keys()
+            results['username_private_map'].keys(),
+            results['username_disabled_map'].keys(),
         ))
 
         _logger.info('Add %d users.', len(usernames))
@@ -28,3 +29,13 @@ class Model(object):
         ]
 
         self._database.update_private_users(user_infos)
+
+        user_infos = [
+            {
+                'username': key,
+                'disabled': value,
+                }
+            for key, value in results['username_disabled_map'].items()
+        ]
+        self._database.update_disabled_users(user_infos)
+

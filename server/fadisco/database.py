@@ -11,7 +11,8 @@ class Database(object):
             self.conn.execute('''
                 CREATE TABLE IF NOT EXISTS users (
                     username TEXT PRIMARY KEY,
-                    private INTEGER
+                    private INTEGER,
+                    disabled INTEGER
                 )
             ''')
 
@@ -33,5 +34,16 @@ class Database(object):
         with self.conn:
             self.conn.executemany(
                 'UPDATE users SET private = ? WHERE username = ?',
+                values
+            )
+
+    def update_disabled_users(self, user_infos):
+        values = [
+            (user_info['disabled'], user_info['username'])
+            for user_info in user_infos
+        ]
+        with self.conn:
+            self.conn.executemany(
+                'UPDATE users SET disabled = ? WHERE username = ?',
                 values
             )

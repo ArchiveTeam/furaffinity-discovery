@@ -45,7 +45,7 @@ def main():
     # arg_doc = {
     #     'nickname': 'testuser',
     #     'discovery_type': 'usernames',
-    #     'usernames': ['toberkitty', 'furryguitarherosam', 'jjake33',],
+    #     'usernames': ['toberkitty', 'furryguitarherosam', 'jjake33', 'narnla'],
     #     'disco_tracker': 'http://localhost:8058'
     # }
 
@@ -110,6 +110,7 @@ def upload_username_results(results, tracker_url):
 
 def discover_usernames(usernames, fetch):
     username_private_map = {}
+    username_disabled_map = {}
     scraped_usernames = set()
 
     for username in usernames:
@@ -122,12 +123,16 @@ def discover_usernames(usernames, fetch):
         is_private = 'has elected to make their content available to registered users only' in response.text
         username_private_map[username] = is_private
 
-        if not is_private:
+        is_disabled = 'This user has voluntarily disabled access to their userpage.' in response.text
+        username_disabled_map[username] = is_disabled
+
+        if not is_private and not is_disabled:
             scraped_usernames.update(scrape_usernames(response.text))
 
     return {
         'discovered_usernames': tuple(scraped_usernames),
-        'username_private_map': username_private_map
+        'username_private_map': username_private_map,
+        'username_disabled_map': username_disabled_map
     }
 
 
