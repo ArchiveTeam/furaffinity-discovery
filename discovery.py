@@ -45,7 +45,7 @@ def main():
     # arg_doc = {
     #     'nickname': 'testuser',
     #     'discovery_type': 'usernames',
-    #     'usernames': ['toberkitty', 'furryguitarherosam'],
+    #     'usernames': ['toberkitty', 'furryguitarherosam', 'jjake33',],
     #     'disco_tracker': 'http://localhost:8058'
     # }
 
@@ -68,7 +68,9 @@ def main():
             response = requests.get(url, headers=headers, timeout=60)
             print_(str(response.status_code))
 
-            if response.status_code != 200 or 'Page generated in' not in response.text:
+            if response.status_code != 200 or \
+                    'Page generated in' not in response.text and \
+                    'This user cannot be found.' not in response.text:
                 print_('Problem detected. Sleeping.')
                 time.sleep(10)
             else:
@@ -113,6 +115,9 @@ def discover_usernames(usernames, fetch):
     for username in usernames:
         url = 'https://www.furaffinity.net/user/{0}/'.format(username)
         response = fetch(url)
+
+        if 'This user cannot be found.' in response.text:
+            continue
 
         is_private = 'has elected to make their content available to registered users only' in response.text
         username_private_map[username] = is_private
