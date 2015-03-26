@@ -19,7 +19,7 @@ def main():
     model = Model(database)
 
     app = App(model, prefix=args.prefix)
-    app.listen(args.port)
+    app.listen(args.port, address='localhost')
     IOLoop.current().start()
 
 
