@@ -15,6 +15,9 @@ class Database(object):
                 )
             ''')
 
+            self.conn.execute('PRAGMA synchronous = NORMAL')
+            self.conn.execute('PRAGMA journal_mode = WAL')
+
     def add_users(self, usernames):
         with self.conn:
             self.conn.executemany(
