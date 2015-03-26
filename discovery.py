@@ -52,7 +52,8 @@ def main():
     # arg_doc = {
     #     'nickname': 'testuser',
     #     'discovery_type': 'search',
-    #     'query': '@keywords%20puppy',
+    #     # 'query': '@keywords%20puppy',
+    #     'query': '@keywords%20kanto',
     #     'disco_tracker': 'http://localhost:8058'
     # }
 
@@ -162,7 +163,7 @@ def discover_usernames_by_search(query, fetch):
         usernames.update(scraped_results)
         print_('(Found', len(scraped_results), ')')
 
-        if 'next_page' not in response.text:
+        if 'class="button" type="submit" name="next_page"' not in response.text:
             break
 
     return {
