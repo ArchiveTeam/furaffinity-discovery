@@ -155,14 +155,22 @@ pipeline = Pipeline(
     CheckIP(),
     GetItemFromTracker("http://%s/%s" % (TRACKER_HOST, TRACKER_ID), downloader,
                        VERSION),
-    ExternalProcess(
-        'Discovery',
-        DiscoveryArgs(),
-        max_tries=1,
-        accept_on_exit_code=[0],
+    LimitConcurrent(
+        NumberConfigValue(
+            min=1, max=6, default=globals().get("num_disco_procs", "1"),
+            name="shared:fadisco:num_disco_procs", title="Number of Processes",
+            description="The maximum number of concurrent discovery processes."
+        ),
+        ExternalProcess(
+            'Discovery',
+            DiscoveryArgs(),
+            max_tries=1,
+            accept_on_exit_code=[0],
+        ),
     ),
     PrepareStatsForTracker(
         defaults={"downloader": downloader, "version": VERSION},
+        file_groups={"data": []},
         id_function=stats_id_function,
     ),
     SendDoneToTracker(
