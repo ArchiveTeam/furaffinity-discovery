@@ -110,7 +110,7 @@ class DiscoveryArgs(object):
 
         item_type, item_value = item['item_name'].split(':', 1)
 
-        if item_type == 'usernames':
+        if item_type in ('usernames', 'private_usernames'):
             doc = {
                 'nickname': realize(downloader, item),
                 'discovery_type': item_type,

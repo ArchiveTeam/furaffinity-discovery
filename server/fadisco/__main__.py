@@ -13,6 +13,7 @@ def main():
 
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('database')
+    arg_parser.add_argument('secrets_file')
     arg_parser.add_argument('--prefix', default='')
     arg_parser.add_argument('--port', default=8058, type=int)
     arg_parser.add_argument('--xheaders', action='store_true')
@@ -20,7 +21,7 @@ def main():
     args = arg_parser.parse_args()
 
     database = Database(args.database)
-    model = Model(database)
+    model = Model(database, args.secrets_file)
 
     app = App(model, prefix=args.prefix)
     app.listen(args.port, address='localhost', xheaders=args.xheaders)
