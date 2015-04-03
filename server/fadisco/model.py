@@ -68,7 +68,7 @@ class Model(object):
 
         rand = random.Random(ip_address)
         secrets = doc['secrets']
-        secret = rand.choice('secrets')
+        secret = rand.choice(secrets)
 
         return {
             'username': secret['username'],

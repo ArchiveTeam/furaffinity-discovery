@@ -47,4 +47,4 @@ class GetSecretsHandler(BaseHandler):
         if version != '1':
             raise tornado.web.HTTPError(400)
 
-        self.write(self.application.get_secrets(self.request.remote_ip))
+        self.write(self.application.model.get_secrets(self.request.remote_ip))

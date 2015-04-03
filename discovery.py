@@ -96,14 +96,18 @@ def main():
                 'This user cannot be found.' in response.text
             )
 
+            is_404_error_page = (
+                'This user cannot be found.' in response.text
+            )
+
             if response.status_code != expect_status and not ok_text_found:
                 print_('Problem detected. Sleeping.')
                 time.sleep(60)
-            elif ok_text_found and state['logged_in'] and '/logout/' not in response.text:
+            elif ok_text_found and not is_404_error_page and state['logged_in'] and '/logout/' not in response.text:
                 print_('Problem detected. Not logged in! Sleeping.')
                 time.sleep(60)
                 raise Exception('Not logged in!')
-            elif ok_text_found and state['logged_in'] and 'Toggle to hide Mature and Adult submissions.' not in response.text:
+            elif ok_text_found and not is_404_error_page and state['logged_in'] and 'Toggle to hide Mature and Adult submissions.' not in response.text:
                 print_('Problem detected. Cannot view adult material! Sleeping.')
                 time.sleep(60)
                 raise Exception('Cannot view adult material!')
@@ -123,7 +127,7 @@ def main():
             print_('Get login secrets...', end='')
             try:
                 response = requests.post(
-                    disco_tracker + '/api/get_secret?v=1',
+                    disco_tracker + '/api/get_secrets?v=1',
                     timeout=60
                 )
             except requests.exceptions.ConnectionError:
@@ -143,7 +147,7 @@ def main():
 
         secrets_doc = json.loads(response.text)
         username = secrets_doc['username']
-        password = base64.b64decode(secrets_doc['password'].encode('ascii')).decode('acsii')
+        password = base64.b64decode(secrets_doc['password'].encode('ascii')).decode('ascii')
 
         fetch(
             'https://www.furaffinity.net/' + 'login/?ref=https://www.furaffinity.net/',
@@ -181,8 +185,7 @@ def main():
 
         # Ensure it is empty since we are already logged in and we don't want
         # to categorize any profiles as not private
-        assert not results['username_private_map']
-        del results['username_private_map']
+        results.pop('username_private_map', None)
 
         upload_username_results(results, disco_tracker, scraped_from_private=True)
     elif discovery_type == 'search':
